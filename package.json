@@ -1,0 +1,21 @@
+{
+  "name": "ecodesigner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "watch": "npx tsc -w"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.62.0",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "whatwg-fetch": "^3.6.2"
+  }
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/whatwg-fetch/3.6.2/fetch.min.js"></script>
+    <style>
+      /* Add your CSS styles */
+    </style>
+  </head>
+  <body>
+    <h1>Carbon Footprint</h1>
+    <p id="carbonFootprint">0 g CO2e</p>
+    <h2>Reduce your footprint</h2>
+    <ul id="links"></ul>
+    <script>
+      const getIpAddressAndLocation = async () => {
+        try {
+          const response = await fetch('https://ipapi.co/json/');
+          const data = await response.json();
+          return { ipAddress: data.ip, countryCode: data.country };
+        } catch (error) {
+          console.error('Error fetching IP and location:', error);
+          return { ipAddress: '', countryCode: '' };
+        }
+      };
+
+      const getCarbonIntensity = async (countryCode) => {
+        try {
+          const response = await fetch(`https://api.electricitymap.org/v3/carbon_intensity/latest?countryCode=${countryCode}`);
+          const data = await response.json();
+          return data.data.carbonIntensity;
+        } catch (error) {
+          console.error('Error fetching carbon intensity:', error);
+          return 500; // Fallback value if the API request fails
+        }
+      };
+
+      const getEnergyConsumption = (deviceType) => {
+        const powerUsage = deviceType === 'desktop' ? 0.15 : 0.05; // kW (sample values, adjust as needed)
+        return powerUsage;
+      };
+
+      (async () => {
+        const { countryCode } = await getIpAddressAndLocation();
+        const carbonIntensity = await getCarbonIntensity(countryCode);
+        const deviceType = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
+        const energyConsumption = getEnergyConsumption(deviceType);
+
+        parent.postMessage({ pluginMessage: { type: 'updateCarbonFootprint', energyConsumption, carbonIntensity } }, '*');
+      })();
+
+      onmessage = (event) => {
+        if (event.data.pluginMessage.type === 'updateCarbonFootprint') {
+          document.getElementById('carbonFootprint').innerText = event.data.pluginMessage.carbonFootprint.toFixed(2) + ' g CO2e';
+        } else if (event.data.pluginMessage.type === 'displayLinks') {
+          const linksContainer = document.getElementById('links');
+          event.data.pluginMessage.links.forEach((link) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = link.url;
+            a.target = '_blank';
+            a.innerText = link.title;
+            li.appendChild(a);
+            linksContainer.appendChild(li);
+          });
+        }
+      };
+
+      parent.postMessage({ pluginMessage: { type: 'getLinks' } }, '*');
+    </script>
+  </body>
+</html>
