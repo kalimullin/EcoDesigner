@@ -5,7 +5,7 @@ const calculateCarbonFootprint = (energyConsumption: number, carbonIntensity: nu
     return carbonFootprint;
   };
   
-  figma.showUI(__html__, { width: 250, height: 350 });
+  figma.showUI(__html__, { width: 300, height: 270 });
   
   figma.ui.onmessage = async (msg) => {
     if (msg.type === 'updateCarbonFootprint') {

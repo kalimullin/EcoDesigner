@@ -40,7 +40,7 @@ var calculateCarbonFootprint = function (energyConsumption, carbonIntensity) {
     var carbonFootprint = energyConsumption * carbonIntensity;
     return carbonFootprint;
 };
-figma.showUI(__html__, { width: 250, height: 350 });
+figma.showUI(__html__, { width: 300, height: 270 });
 figma.ui.onmessage = function (msg) { return __awaiter(void 0, void 0, void 0, function () {
     var energyConsumption_1, carbonIntensity_1, startTime_1, links;
     return __generator(this, function (_a) {

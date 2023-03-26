@@ -1,71 +1,131 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/whatwg-fetch/3.6.2/fetch.min.js"></script>
     <style>
-      /* Add your CSS styles */
+      body {
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        font-family: Inter, sans-serif;
+      }
+
+      .main-block {
+        background-color: #0F8BE2;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .counter {
+        font-family: 'IBM Plex Mono', monospace;
+        font-weight: 500;
+        font-size: 32px;
+        line-height: 40px;
+        color: #FFFFFF;
+      }
+
+      .subtitle {
+        font-size: 11px;
+        line-height: 16px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .second-block {
+        background-color: #FFFFFF;
+        padding: 16px;
+        text-align: center;
+      }
+
+      .note {
+        font-size: 11px;
+        line-height: 16px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.4);
+      }
+
+      .link {
+        font-size: 11px;
+        line-height: 16px;
+        font-weight: 500;
+        color: #18A0FB;
+        text-decoration: none;
+      }
     </style>
   </head>
   <body>
-    <h1>Carbon Footprint</h1>
-    <p id="carbonFootprint">0 g CO2e</p>
-    <h2>Reduce your footprint</h2>
-    <ul id="links"></ul>
+    <div class="main-block">
+      <div id="carbonFootprint" class="counter">0g</div>
+      <p class="subtitle">of CO2e are produced right now to generate the electricity used by Figma</p>
+    </div>
+    <div class="second-block">
+      <p class="note">
+        *rough estimate based on your IP location and device
+      </p>
+      <a
+        href="https://treesforlife.org.uk/support/for-businesses/carbon-offsetting/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="link"
+      >
+        Plant trees to reduce your carbon impact →
+      </a>
+    </div>
+
     <script>
-      const getIpAddressAndLocation = async () => {
-        try {
-          const response = await fetch('https://ipapi.co/json/');
-          const data = await response.json();
-          return { ipAddress: data.ip, countryCode: data.country };
-        } catch (error) {
-          console.error('Error fetching IP and location:', error);
-          return { ipAddress: '', countryCode: '' };
-        }
-      };
-
-      const getCarbonIntensity = async (countryCode) => {
-        try {
-          const response = await fetch(`https://api.electricitymap.org/v3/carbon_intensity/latest?countryCode=${countryCode}`);
-          const data = await response.json();
-          return data.data.carbonIntensity;
-        } catch (error) {
-          console.error('Error fetching carbon intensity:', error);
-          return 500; // Fallback value if the API request fails
-        }
-      };
-
-      const getEnergyConsumption = (deviceType) => {
-        const powerUsage = deviceType === 'desktop' ? 0.15 : 0.05; // kW (sample values, adjust as needed)
-        return powerUsage;
-      };
-
-      (async () => {
-        const { countryCode } = await getIpAddressAndLocation();
-        const carbonIntensity = await getCarbonIntensity(countryCode);
-        const deviceType = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
-        const energyConsumption = getEnergyConsumption(deviceType);
-
-        parent.postMessage({ pluginMessage: { type: 'updateCarbonFootprint', energyConsumption, carbonIntensity } }, '*');
-      })();
-
-      onmessage = (event) => {
-        if (event.data.pluginMessage.type === 'updateCarbonFootprint') {
-          document.getElementById('carbonFootprint').innerText = event.data.pluginMessage.carbonFootprint.toFixed(2) + ' g CO2e';
-        } else if (event.data.pluginMessage.type === 'displayLinks') {
-          const linksContainer = document.getElementById('links');
-          event.data.pluginMessage.links.forEach((link) => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = link.url;
-            a.target = '_blank';
-            a.innerText = link.title;
-            li.appendChild(a);
-            linksContainer.appendChild(li);
-          });
-        }
-      };
-
-      parent.postMessage({ pluginMessage: { type: 'getLinks' } }, '*');
-    </script>
+        const getIpAddressAndLocation = async () => {
+          try {
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+            return { ipAddress: data.ip, countryCode: data.country };
+          } catch (error) {
+            console.error('Error fetching IP and location:', error);
+            return { ipAddress: '', countryCode: '' };
+          }
+        };
+  
+        const getCarbonIntensity = async (countryCode) => {
+          try {
+            const response = await fetch(`https://api.electricitymap.org/v3/carbon_intensity/latest?countryCode=${countryCode}`);
+            const data = await response.json();
+            return data.data.carbonIntensity;
+          } catch (error) {
+            console.error('Error fetching carbon intensity:', error);
+            return 500; // Fallback value if the API request fails
+          }
+        };
+  
+        const getEnergyConsumption = (deviceType) => {
+          const powerUsage = deviceType === 'desktop' ? 0.15 : 0.05; // kW (sample values, adjust as needed)
+          return powerUsage;
+        };
+  
+        (async () => {
+          const { countryCode } = await getIpAddressAndLocation();
+          const carbonIntensity = await getCarbonIntensity(countryCode);
+          const deviceType = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
+          const energyConsumption = getEnergyConsumption(deviceType);
+  
+          parent.postMessage({ pluginMessage: { type: 'updateCarbonFootprint', energyConsumption, carbonIntensity } }, '*');
+        })();
+  
+        onmessage = (event) => {
+          if (event.data.pluginMessage.type === 'updateCarbonFootprint') {
+            document.getElementById('carbonFootprint').innerText = event.data.pluginMessage.carbonFootprint.toFixed(2) + 'g*';
+          } else if (event.data.pluginMessage.type === 'displayLinks') {
+            const linksContainer = document.getElementById('links');
+            event.data.pluginMessage.links.forEach((link) => {
+              const li = document.createElement('li');
+              const a = document.createElement('a');
+              a.href = link.url;
+              a.target = '_blank';
+              a.innerText = link.title;
+              li.appendChild(a);
+              linksContainer.appendChild(li);
+            });
+          }
+        };
+  
+        parent.postMessage({ pluginMessage: { type: 'getLinks' } }, '*');
+      </script>
   </body>
 </html>
